@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinAgile — App Financeiro</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/dist/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#e8ecf4;color:#1a1a2e;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.app{display:flex;height:640px;width:960px;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 50px rgba(0,0,0,0.14)}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:#fff;border-right:1px solid #e8edf5;display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-header{padding:20px 16px 12px;border-bottom:1px solid #e8edf5}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;border-radius:9px;background:#0D2350;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700}
+.logo-text{font-size:15px;font-weight:700;color:#0D2350}
+.logo-sub{font-size:11px;color:#9EAFC2}
+.nav{padding:8px;flex:1;overflow-y:auto}
+.nav-section{font-size:10px;font-weight:700;color:#9EAFC2;letter-spacing:.08em;text-transform:uppercase;padding:12px 8px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:#5a6a7e;transition:background .12s,color .12s;user-select:none}
+.nav-item:hover{background:#f4f6fa}
+.nav-item.active{background:#eef2fa;color:#0D2350;font-weight:600}
+.nav-item .ti{font-size:16px}
+.nav-badge{margin-left:auto;background:#0D2350;color:#fff;font-size:10px;padding:1px 6px;border-radius:20px}
+.sidebar-footer{padding:12px 8px;border-top:1px solid #e8edf5}
+.user-row{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;cursor:pointer}
+.user-row:hover{background:#f4f6fa}
+.avatar{width:30px;height:30px;border-radius:50%;background:#1A3A6B;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.user-name{font-size:13px;font-weight:600;color:#1a1a2e}
+.user-role{font-size:11px;color:#9EAFC2}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f0f2f7}
+.topbar{background:#fff;border-bottom:1px solid #e8edf5;padding:0 20px;height:54px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:700;color:#0D2350;flex:1}
+.tab-bar{display:flex;gap:2px;background:#f0f2f7;padding:3px;border-radius:8px;border:1px solid #e0e6f0}
+.tab{padding:4px 12px;border-radius:6px;font-size:12px;color:#5a6a7e;cursor:pointer;transition:background .12s}
+.tab.active{background:#fff;color:#0D2350;font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.topbar-period{font-size:12px;color:#5a6a7e;background:#f4f6fa;padding:5px 10px;border-radius:8px;border:1px solid #e0e6f0;display:flex;align-items:center;gap:5px}
+.btn-primary{background:#0D2350;color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:600;transition:background .12s}
+.btn-primary:hover{background:#1A3A6B}
+
+.content{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+
+/* PAGE */
+.page{display:none;flex-direction:column;gap:14px}
+.page.active{display:flex}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.metric-card{background:#fff;border:1px solid #e8edf5;border-radius:12px;padding:14px 16px;cursor:default}
+.metric-label{font-size:11px;color:#9EAFC2;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.metric-value{font-size:21px;font-weight:700;color:#0D2350;line-height:1}
+.metric-delta{font-size:11px;margin-top:5px;display:flex;align-items:center;gap:3px}
+.up{color:#0F6E56}.down{color:#993C1D}
+
+/* ACCOUNTS */
+.accounts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.account-card{background:#fff;border:1.5px solid #e8edf5;border-radius:12px;padding:14px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.account-card:hover{border-color:#1A3A6B;box-shadow:0 2px 12px rgba(13,35,80,.08)}
+.account-card.selected{border:2px solid #0D2350;box-shadow:0 2px 12px rgba(13,35,80,.12)}
+.account-type{font-size:11px;color:#9EAFC2;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.account-bal{font-size:19px;font-weight:700;color:#0D2350}
+.account-number{font-size:11px;color:#9EAFC2;margin-top:3px}
+
+/* CHART */
+.chart-wrap{background:#fff;border:1px solid #e8edf5;border-radius:12px;padding:14px 16px}
+.section-row{display:flex;align-items:center;justify-content:space-between}
+.section-label{font-size:13px;font-weight:700;color:#0D2350}
+.section-sub{font-size:11px;color:#9EAFC2}
+.bars{display:flex;align-items:flex-end;gap:6px;height:80px;margin-top:10px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar{width:100%;border-radius:3px 3px 0 0;cursor:pointer;transition:opacity .15s,transform .15s;position:relative}
+.bar:hover{opacity:.8;transform:scaleY(1.04);transform-origin:bottom}
+.bar-lbl{font-size:9px;color:#9EAFC2;text-align:center}
+
+/* TX LIST */
+.tx-list{background:#fff;border:1px solid #e8edf5;border-radius:12px;overflow:hidden}
+.tx-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #f0f2f7;cursor:pointer;transition:background .1s}
+.tx-item:last-child{border-bottom:none}
+.tx-item:hover{background:#f8faff}
+.tx-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.tx-info{flex:1}
+.tx-name{font-size:13px;font-weight:500;color:#1a1a2e}
+.tx-date{font-size:11px;color:#9EAFC2}
+.tx-amount{font-size:14px;font-weight:700;text-align:right}
+.income{color:#0F6E56}.expense{color:#993C1D}
+.badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;white-space:nowrap}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:100}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden}
+.modal-header{padding:18px 20px 14px;border-bottom:1px solid #e8edf5;display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:15px;font-weight:700;color:#0D2350}
+.modal-close{background:none;border:none;cursor:pointer;font-size:20px;color:#9EAFC2;padding:2px;border-radius:6px;line-height:1}
+.modal-close:hover{background:#f4f6fa;color:#1a1a2e}
+.modal-body{padding:20px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:600;color:#5a6a7e;margin-bottom:5px;display:block}
+.form-input,.form-select{width:100%;border:1px solid #e0e6f0;border-radius:8px;padding:9px 12px;font-size:13px;color:#1a1a2e;background:#fff;outline:none;transition:border-color .12s;font-family:inherit}
+.form-input:focus,.form-select:focus{border-color:#0D2350;box-shadow:0 0 0 3px rgba(13,35,80,.08)}
+.radio-group{display:flex;gap:8px}
+.radio-btn{flex:1;border:1.5px solid #e0e6f0;border-radius:8px;padding:8px;text-align:center;cursor:pointer;font-size:12px;font-weight:600;color:#5a6a7e;transition:all .12s}
+.radio-btn:hover{border-color:#1A3A6B;color:#1A3A6B}
+.radio-btn.sel{border-color:#0D2350;background:#eef2fa;color:#0D2350}
+.modal-footer{padding:14px 20px;border-top:1px solid #e8edf5;display:flex;gap:8px;justify-content:flex-end}
+.btn-cancel{background:none;border:1px solid #e0e6f0;border-radius:8px;padding:7px 16px;font-size:13px;color:#5a6a7e;cursor:pointer;font-family:inherit}
+.btn-cancel:hover{background:#f4f6fa}
+.btn-confirm{background:#0D2350;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;cursor:pointer;font-weight:600;font-family:inherit;transition:background .12s}
+.btn-confirm:hover{background:#1A3A6B}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#0D2350;color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:500;box-shadow:0 6px 24px rgba(0,0,0,0.2);transition:transform .3s ease,opacity .3s ease;opacity:0;z-index:200;pointer-events:none;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* TX DETAIL */
+.tx-detail{background:#f8faff;border-radius:10px;padding:14px;font-size:13px;line-height:1.9;color:#1a1a2e}
+.tx-detail span{color:#9EAFC2;font-size:11px;display:block}
+
+/* TRANSFER PAGE */
+.transfer-form{background:#fff;border:1px solid #e8edf5;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.amount-display{font-size:36px;font-weight:700;color:#0D2350;text-align:center;padding:20px;background:#f8faff;border-radius:10px;border:2px solid #eef2fa;letter-spacing:1px;cursor:text;min-height:80px;display:flex;align-items:center;justify-content:center}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.numkey{background:#f4f6fa;border:none;border-radius:10px;padding:14px;font-size:18px;font-weight:600;color:#0D2350;cursor:pointer;transition:background .1s;font-family:inherit}
+.numkey:hover{background:#e8edf5}
+.numkey.del{color:#993C1D;background:#faecec}
+.numkey.del:hover{background:#f5c4c4}
+.numkey.zero{grid-column:span 2}
+.progress-bar-wrap{background:#e8edf5;border-radius:20px;height:6px;overflow:hidden;margin-top:4px}
+.progress-bar{height:100%;border-radius:20px;background:#0D2350;transition:width .4s ease}
+
+/* REPORT PAGE */
+.report-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.report-card{background:#fff;border:1px solid #e8edf5;border-radius:12px;padding:14px}
+.pie-wrap{display:flex;align-items:center;gap:16px}
+.pie-legend{display:flex;flex-direction:column;gap:6px;flex:1}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:12px;color:#5a6a7e}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.progress-item{margin-bottom:8px}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;color:#5a6a7e;margin-bottom:3px}
+
+/* EXTRATO PAGE */
+.extrato-header{background:#fff;border:1px solid #e8edf5;border-radius:12px;padding:16px;display:flex;align-items:center;justify-content:space-between}
+.btn-outline{border:1px solid #0D2350;color:#0D2350;background:none;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:600;transition:background .12s;font-family:inherit}
+.btn-outline:hover{background:#eef2fa}
+.extrato-list{background:#fff;border:1px solid #e8edf5;border-radius:12px;overflow:hidden}
+.extrato-month{padding:8px 14px;background:#f8faff;font-size:11px;font-weight:700;color:#9EAFC2;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #f0f2f7}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon">FA</div>
+        <div>
+          <div class="logo-text">FinAgile</div>
+          <div class="logo-sub">Gestão financeira</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav">
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" data-page="dashboard"><i class="ti ti-layout-dashboard"></i> Visão geral</div>
+      <div class="nav-item" data-page="contas"><i class="ti ti-credit-card"></i> Contas <span class="nav-badge">2</span></div>
+      <div class="nav-item" data-page="transacoes"><i class="ti ti-arrows-exchange"></i> Transações</div>
+      <div class="nav-item" data-page="relatorios"><i class="ti ti-chart-pie"></i> Relatórios</div>
+      <div class="nav-section">Feature Sets</div>
+      <div class="nav-item" data-page="contas"><i class="ti ti-user-circle"></i> Gestão de Contas</div>
+      <div class="nav-item" data-page="transferencia"><i class="ti ti-transfer"></i> Transferências</div>
+      <div class="nav-item" data-page="extrato"><i class="ti ti-file-text"></i> Extrato PDF</div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="avatar">CH</div>
+        <div>
+          <div class="user-name">Caio Henrique</div>
+          <div class="user-role">Conta pessoal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title" id="page-title">Visão geral</span>
+      <div class="tab-bar">
+        <div class="tab active" data-period="Mensal">Mensal</div>
+        <div class="tab" data-period="Anual">Anual</div>
+      </div>
+      <span class="topbar-period"><i class="ti ti-calendar"></i> Junho 2026</span>
+      <button class="btn-primary" id="btn-nova-tx"><i class="ti ti-plus"></i> Nova transação</button>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="metrics">
+          <div class="metric-card">
+            <div class="metric-label"><i class="ti ti-wallet"></i> Saldo total</div>
+            <div class="metric-value" id="saldo-total">R$ 12.480</div>
+            <div class="metric-delta up"><i class="ti ti-trending-up"></i> +4,2% este mês</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label"><i class="ti ti-arrow-down-circle"></i> Receitas</div>
+            <div class="metric-value">R$ 6.200</div>
+            <div class="metric-delta up"><i class="ti ti-trending-up"></i> +12% vs mai</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label"><i class="ti ti-arrow-up-circle"></i> Despesas</div>
+            <div class="metric-value" id="total-despesas">R$ 3.840</div>
+            <div class="metric-delta down"><i class="ti ti-trending-down"></i> +8% vs mai</div>
+          </div>
+        </div>
+        <div class="accounts-grid">
+          <div class="account-card selected" data-account="corrente">
+            <div class="account-type"><i class="ti ti-building-bank"></i> Conta corrente</div>
+            <div class="account-bal" id="bal-corrente">R$ 8.230,00</div>
+            <div class="account-number">•••• •••• 4821</div>
+          </div>
+          <div class="account-card" data-account="poupanca">
+            <div class="account-type"><i class="ti ti-piggy-bank"></i> Poupança</div>
+            <div class="account-bal" id="bal-poupanca">R$ 4.250,00</div>
+            <div class="account-number">•••• •••• 9104</div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <div class="section-row">
+            <span class="section-label">Gastos por categoria</span>
+            <span class="section-sub">Junho 2026</span>
+          </div>
+          <div class="bars" id="bars-chart">
+            <div class="bar-col"><div class="bar" style="height:100%;background:#0D2350" data-cat="Moradia" data-val="1800"></div><div class="bar-lbl">Moradia</div></div>
+            <div class="bar-col"><div class="bar" style="height:58%;background:#1A3A6B" data-cat="Alimentação" data-val="1050"></div><div class="bar-lbl">Alimentação</div></div>
+            <div class="bar-col"><div class="bar" style="height:38%;background:#1E6B9E" data-cat="Transporte" data-val="680"></div><div class="bar-lbl">Transporte</div></div>
+            <div class="bar-col"><div class="bar" style="height:28%;background:#F5A623" data-cat="Lazer" data-val="510"></div><div class="bar-lbl">Lazer</div></div>
+            <div class="bar-col"><div class="bar" style="height:20%;background:#9EAFC2" data-cat="Saúde" data-val="360"></div><div class="bar-lbl">Saúde</div></div>
+            <div class="bar-col"><div class="bar" style="height:13%;background:#ccd6e0" data-cat="Outros" data-val="240"></div><div class="bar-lbl">Outros</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-row" style="margin-bottom:8px">
+            <span class="section-label">Transações recentes</span>
+            <span class="section-sub" style="cursor:pointer;color:#0D2350" id="ver-todas">Ver todas →</span>
+          </div>
+          <div class="tx-list" id="tx-list-dash"></div>
+        </div>
+      </div>
+
+      <!-- CONTAS -->
+      <div class="page" id="page-contas">
+        <div class="metrics">
+          <div class="metric-card">
+            <div class="metric-label"><i class="ti ti-wallet"></i> Patrimônio total</div>
+            <div class="metric-value">R$ 12.480</div>
+            <div class="metric-delta up"><i class="ti ti-trending-up"></i> +4,2% este mês</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label"><i class="ti ti-building-bank"></i> Conta corrente</div>
+            <div class="metric-value">R$ 8.230</div>
+            <div class="metric-delta up"><i class="ti ti-check"></i> Ativa</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label"><i class="ti ti-piggy-bank"></i> Poupança</div>
+            <div class="metric-value">R$ 4.250</div>
+            <div class="metric-delta up"><i class="ti ti-check"></i> Ativa</div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #e8edf5;border-radius:12px;overflow:hidden">
+          <div style="padding:14px 16px;border-bottom:1px solid #f0f2f7;display:flex;align-items:center;justify-content:space-between">
+            <span class="section-label">Minhas contas</span>
+            <button class="btn-primary" style="font-size:12px;padding:5px 12px" id="btn-nova-conta"><i class="ti ti-plus"></i> Nova conta</button>
+          </div>
+          <div id="contas-list"></div>
+        </div>
+      </div>
+
+      <!-- TRANSAÇÕES -->
+      <div class="page" id="page-transacoes">
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="tx-search" placeholder="Buscar transação..." style="flex:1">
+          <select class="form-select" id="tx-filter" style="width:140px">
+            <option value="todas">Todas</option>
+            <option value="receita">Receitas</option>
+            <option value="despesa">Despesas</option>
+          </select>
+        </div>
+        <div class="tx-list" id="tx-list-full"></div>
+      </div>
+
+      <!-- TRANSFERÊNCIA -->
+      <div class="page" id="page-transferencia">
+        <div class="transfer-form">
+          <div class="section-label" style="margin-bottom:-4px">Nova transferência</div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">De</label>
+            <select class="form-select" id="tf-de">
+              <option value="corrente">Conta corrente (R$ 8.230,00) •4821</option>
+              <option value="poupanca">Poupança (R$ 4.250,00) •9104</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center"><i class="ti ti-arrows-down-up" style="font-size:20px;color:#9EAFC2"></i></div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Para</label>
+            <select class="form-select" id="tf-para">
+              <option value="poupanca">Poupança (R$ 4.250,00) •9104</option>
+              <option value="corrente">Conta corrente (R$ 8.230,00) •4821</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Valor</label>
+            <div class="amount-display" id="tf-amount">R$ 0,00</div>
+            <div class="numpad">
+              <button class="numkey" data-k="1">1</button><button class="numkey" data-k="2">2</button><button class="numkey" data-k="3">3</button>
+              <button class="numkey" data-k="4">4</button><button class="numkey" data-k="5">5</button><button class="numkey" data-k="6">6</button>
+              <button class="numkey" data-k="7">7</button><button class="numkey" data-k="8">8</button><button class="numkey" data-k="9">9</button>
+              <button class="numkey zero" data-k="0">0</button><button class="numkey del" data-k="del"><i class="ti ti-backspace"></i></button>
+            </div>
+          </div>
+          <button class="btn-primary" id="btn-confirmar-tf" style="justify-content:center;padding:12px"><i class="ti ti-send"></i> Confirmar transferência</button>
+        </div>
+      </div>
+
+      <!-- RELATÓRIOS -->
+      <div class="page" id="page-relatorios">
+        <div class="metrics">
+          <div class="metric-card"><div class="metric-label"><i class="ti ti-chart-bar"></i> Total gasto</div><div class="metric-value">R$ 3.840</div><div class="metric-delta down">Junho 2026</div></div>
+          <div class="metric-card"><div class="metric-label"><i class="ti ti-home"></i> Maior gasto</div><div class="metric-value">Moradia</div><div class="metric-delta" style="color:#9EAFC2">R$ 1.800 — 46,9%</div></div>
+          <div class="metric-card"><div class="metric-label"><i class="ti ti-arrow-down"></i> Menor gasto</div><div class="metric-value">Outros</div><div class="metric-delta" style="color:#9EAFC2">R$ 240 — 6,3%</div></div>
+        </div>
+        <div class="report-grid">
+          <div class="report-card">
+            <div class="section-label" style="margin-bottom:12px">Por categoria</div>
+            <div class="pie-wrap">
+              <svg width="90" height="90" viewBox="0 0 90 90" id="pie-chart"></svg>
+              <div class="pie-legend" id="pie-legend"></div>
+            </div>
+          </div>
+          <div class="report-card">
+            <div class="section-label" style="margin-bottom:12px">Distribuição</div>
+            <div id="progress-bars"></div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <div class="section-row"><span class="section-label">Evolução mensal</span></div>
+          <div class="bars" style="height:100px;margin-top:12px">
+            <div class="bar-col"><div class="bar" style="height:60%;background:#e8edf5"></div><div class="bar-lbl">Jan</div></div>
+            <div class="bar-col"><div class="bar" style="height:72%;background:#e8edf5"></div><div class="bar-lbl">Fev</div></div>
+            <div class="bar-col"><div class="bar" style="height:55%;background:#e8edf5"></div><div class="bar-lbl">Mar</div></div>
+            <div class="bar-col"><div class="bar" style="height:80%;background:#e8edf5"></div><div class="bar-lbl">Abr</div></div>
+            <div class="bar-col"><div class="bar" style="height:65%;background:#1A3A6B"></div><div class="bar-lbl">Mai</div></div>
+            <div class="bar-col"><div class="bar" style="height:100%;background:#0D2350"></div><div class="bar-lbl" style="color:#0D2350;font-weight:700">Jun</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXTRATO -->
+      <div class="page" id="page-extrato">
+        <div class="extrato-header">
+          <div>
+            <div class="section-label">Extrato — Conta corrente •4821</div>
+            <div class="section-sub" style="margin-top:2px">Junho 2026 · 4 lançamentos</div>
+          </div>
+          <button class="btn-outline" id="btn-gerar-pdf"><i class="ti ti-file-download"></i> Gerar PDF</button>
+        </div>
+        <div class="extrato-list">
+          <div class="extrato-month">Junho 2026</div>
+          <div id="extrato-items"></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e8edf5;border-radius:12px;padding:14px 16px">
+          <div class="section-row">
+            <span class="section-label">Resumo do período</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px">
+            <div style="text-align:center"><div style="font-size:11px;color:#9EAFC2;margin-bottom:4px">Entradas</div><div style="font-size:16px;font-weight:700;color:#0F6E56">+ R$ 6.200</div></div>
+            <div style="text-align:center"><div style="font-size:11px;color:#9EAFC2;margin-bottom:4px">Saídas</div><div style="font-size:16px;font-weight:700;color:#993C1D">- R$ 2.642</div></div>
+            <div style="text-align:center"><div style="font-size:11px;color:#9EAFC2;margin-bottom:4px">Saldo final</div><div style="font-size:16px;font-weight:700;color:#0D2350">R$ 8.230</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOVA TRANSAÇÃO -->
+<div class="modal-overlay" id="modal-tx">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nova transação</span>
+      <button class="modal-close" id="modal-close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <div class="radio-group">
+          <div class="radio-btn sel" data-tipo="receita"><i class="ti ti-arrow-down-circle"></i> Receita</div>
+          <div class="radio-btn" data-tipo="despesa"><i class="ti ti-arrow-up-circle"></i> Despesa</div>
+          <div class="radio-btn" data-tipo="transferencia"><i class="ti ti-transfer"></i> Transferência</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <input class="form-input" id="tx-desc" placeholder="Ex: Supermercado BomPreço">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor (R$)</label>
+        <input class="form-input" id="tx-valor" type="number" placeholder="0,00" step="0.01" min="0">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Categoria</label>
+        <select class="form-select" id="tx-cat">
+          <option value="Moradia">Moradia</option>
+          <option value="Alimentação">Alimentação</option>
+          <option value="Transporte">Transporte</option>
+          <option value="Lazer">Lazer</option>
+          <option value="Saúde">Saúde</option>
+          <option value="Salário">Salário</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="modal-cancel">Cancelar</button>
+      <button class="btn-confirm" id="modal-confirm"><i class="ti ti-check"></i> Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALHE TX -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Detalhes da transação</span>
+      <button class="modal-close" id="detail-close">×</button>
+    </div>
+    <div class="modal-body" id="detail-body"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="detail-cancel">Fechar</button>
+      <button class="btn-confirm" style="background:#993C1D" id="detail-delete"><i class="ti ti-trash"></i> Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const catColors={Moradia:'#0D2350',Alimentação:'#1A3A6B',Transporte:'#1E6B9E',Lazer:'#F5A623',Saúde:'#9EAFC2',Outros:'#ccd6e0',Salário:'#0F6E56',Poupança:'#5a6a7e'};
+const catBg={Moradia:'#FAECE7',Alimentação:'#E1F5EE',Transporte:'#EEF2FA',Lazer:'#FEF3E2',Saúde:'#F0F2F7',Salário:'#E1F5EE',Poupança:'#EEF2FA',Outros:'#F0F2F7'};
+const catFg={Moradia:'#993C1D',Alimentação:'#0F6E56',Transporte:'#1A3A6B',Lazer:'#854F0B',Saúde:'#5a6a7e',Salário:'#0F6E56',Poupança:'#0D2350',Outros:'#5a6a7e'};
+const catIcon={Moradia:'ti-home',Alimentação:'ti-shopping-cart',Transporte:'ti-car',Lazer:'ti-music',Saúde:'ti-heart',Salário:'ti-arrow-down-circle',Poupança:'ti-transfer',Outros:'ti-dots'};
+
+let txs=[
+  {id:1,tipo:'receita',desc:'Salário — Empresa XYZ',cat:'Salário',valor:6200,data:'05 jun 2026',conta:'Conta corrente'},
+  {id:2,tipo:'despesa',desc:'Aluguel — Imobiliária Central',cat:'Moradia',valor:1800,data:'01 jun 2026',conta:'Conta corrente'},
+  {id:3,tipo:'despesa',desc:'Supermercado BomPreço',cat:'Alimentação',valor:342.5,data:'07 jun 2026',conta:'Conta corrente'},
+  {id:4,tipo:'transferencia',desc:'Transferência → Poupança',cat:'Poupança',valor:500,data:'08 jun 2026',conta:'Entre contas'},
+  {id:5,tipo:'despesa',desc:'Spotify',cat:'Lazer',valor:21.9,data:'03 jun 2026',conta:'Conta corrente'},
+  {id:6,tipo:'despesa',desc:'Farmácia Central',cat:'Saúde',valor:87,data:'09 jun 2026',conta:'Conta corrente'},
+  {id:7,tipo:'despesa',desc:'Uber',cat:'Transporte',valor:34.5,data:'10 jun 2026',conta:'Conta corrente'},
+];
+let nextId=8;
+let selectedTx=null;
+let tipoSel='receita';
+let tfDigits='';
+let balances={corrente:8230,poupanca:4250};
+
+function fmt(v){return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+function renderTxItem(tx,clickable=true){
+  const isIncome=tx.tipo==='receita';
+  const sign=isIncome?'+':'-';
+  const amtClass=isIncome?'income':'expense';
+  const bg=catBg[tx.cat]||'#f4f6fa';
+  const fg=catFg[tx.cat]||'#5a6a7e';
+  const icon=catIcon[tx.cat]||'ti-dots';
+  const d=document.createElement('div');
+  d.className='tx-item';
+  d.dataset.id=tx.id;
+  d.innerHTML=`<div class="tx-icon" style="background:${bg}"><i class="ti ${icon}" style="color:${fg}"></i></div>
+    <div class="tx-info"><div class="tx-name">${tx.desc}</div><div class="tx-date">${tx.data} · ${tx.conta}</div></div>
+    <div><div class="tx-amount ${amtClass}">${sign} ${fmt(tx.valor)}</div>
+    <div style="text-align:right;margin-top:2px"><span class="badge" style="background:${bg};color:${fg}">${tx.cat}</span></div></div>`;
+  if(clickable)d.addEventListener('click',()=>openDetail(tx.id));
+  return d;
+}
+
+function renderDashTxs(){
+  const el=document.getElementById('tx-list-dash');el.innerHTML='';
+  txs.slice(0,4).forEach(tx=>el.appendChild(renderTxItem(tx)));
+}
+
+function renderFullTxs(){
+  const search=document.getElementById('tx-search').value.toLowerCase();
+  const filter=document.getElementById('tx-filter').value;
+  const el=document.getElementById('tx-list-full');el.innerHTML='';
+  const filtered=txs.filter(t=>{
+    if(filter==='receita'&&t.tipo!=='receita')return false;
+    if(filter==='despesa'&&t.tipo==='receita')return false;
+    return t.desc.toLowerCase().includes(search)||t.cat.toLowerCase().includes(search);
+  });
+  if(!filtered.length){el.innerHTML='<div style="padding:24px;text-align:center;color:#9EAFC2;font-size:13px">Nenhuma transação encontrada.</div>';return;}
+  filtered.forEach(tx=>el.appendChild(renderTxItem(tx)));
+}
+
+function renderExtrato(){
+  const el=document.getElementById('extrato-items');el.innerHTML='';
+  txs.forEach(tx=>el.appendChild(renderTxItem(tx)));
+}
+
+function renderContas(){
+  const el=document.getElementById('contas-list');el.innerHTML='';
+  [{label:'Conta corrente',sub:'•••• •••• 4821',icon:'ti-building-bank',key:'corrente'},
+   {label:'Poupança',sub:'•••• •••• 9104',icon:'ti-piggy-bank',key:'poupanca'}].forEach(c=>{
+    const d=document.createElement('div');
+    d.className='tx-item';
+    d.innerHTML=`<div class="tx-icon" style="background:#eef2fa"><i class="ti ${c.icon}" style="color:#0D2350"></i></div>
+      <div class="tx-info"><div class="tx-name">${c.label}</div><div class="tx-date">${c.sub}</div></div>
+      <div><div class="tx-amount income">${fmt(balances[c.key])}</div></div>`;
+    el.appendChild(d);
+  });
+}
+
+function updateBalances(){
+  document.getElementById('bal-corrente').textContent=fmt(balances.corrente);
+  document.getElementById('bal-poupanca').textContent=fmt(balances.poupanca);
+  const total=balances.corrente+balances.poupanca;
+  document.getElementById('saldo-total').textContent=fmt(total).replace(',00','');
+  renderContas();
+}
+
+function renderPie(){
+  const cats=['Moradia','Alimentação','Transporte','Lazer','Saúde','Outros'];
+  const vals=[1800,1050,680,510,360,240];
+  const total=vals.reduce((a,b)=>a+b,0);
+  const colors=['#0D2350','#1A3A6B','#1E6B9E','#F5A623','#9EAFC2','#ccd6e0'];
+  let svgPath='';let angle=0;
+  const cx=45,cy=45,r=38,ri=20;
+  vals.forEach((v,i)=>{
+    const pct=v/total,a=pct*Math.PI*2;
+    const x1=cx+r*Math.sin(angle),y1=cy-r*Math.cos(angle);
+    const x2=cx+r*Math.sin(angle+a),y2=cy-r*Math.cos(angle+a);
+    const xi1=cx+ri*Math.sin(angle),yi1=cy-ri*Math.cos(angle);
+    const xi2=cx+ri*Math.sin(angle+a),yi2=cy-ri*Math.cos(angle+a);
+    const lg=pct>.5?1:0;
+    svgPath+=`<path d="M${xi1},${yi1} L${x1},${y1} A${r},${r} 0 ${lg} 1 ${x2},${y2} L${xi2},${yi2} A${ri},${ri} 0 ${lg} 0 ${xi1},${yi1}" fill="${colors[i]}" opacity=".92"/>`;
+    angle+=a;
+  });
+  document.getElementById('pie-chart').innerHTML=svgPath;
+  const leg=document.getElementById('pie-legend');leg.innerHTML='';
+  cats.forEach((c,i)=>{
+    leg.innerHTML+=`<div class="legend-item"><div class="legend-dot" style="background:${colors[i]}"></div>${c} <span style="margin-left:auto;font-weight:600;color:#0D2350">${Math.round(vals[i]/total*100)}%</span></div>`;
+  });
+  const pb=document.getElementById('progress-bars');pb.innerHTML='';
+  cats.forEach((c,i)=>{
+    pb.innerHTML+=`<div class="progress-item">
+      <div class="progress-label"><span>${c}</span><span style="color:#0D2350;font-weight:600">${fmt(vals[i])}</span></div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${Math.round(vals[i]/total*100)}%;background:${colors[i]}"></div></div>
+    </div>`;
+  });
+}
+
+// NAVIGATION
+function goPage(id,title){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('page-title').textContent=title;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll(`[data-page="${id}"]`).forEach(n=>n.classList.add('active'));
+  if(id==='transacoes')renderFullTxs();
+  if(id==='extrato')renderExtrato();
+  if(id==='relatorios')renderPie();
+  if(id==='contas')renderContas();
+}
+
+document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
+  item.addEventListener('click',()=>{
+    const p=item.dataset.page;
+    const titles={dashboard:'Visão geral',contas:'Gestão de Contas',transacoes:'Transações',transferencia:'Transferências',relatorios:'Relatórios',extrato:'Extrato PDF'};
+    goPage(p,titles[p]);
+  });
+});
+
+document.querySelectorAll('.tab[data-period]').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+
+// ACCOUNT SELECT
+document.querySelectorAll('.account-card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    document.querySelectorAll('.account-card').forEach(c=>c.classList.remove('selected'));
+    card.classList.add('selected');
+    showToast(`Conta ${card.dataset.account==='corrente'?'corrente':'poupança'} selecionada`);
+  });
+});
+
+// BAR HOVER
+document.querySelectorAll('#bars-chart .bar').forEach(bar=>{
+  bar.addEventListener('mouseenter',()=>{
+    showToast(`${bar.dataset.cat}: ${fmt(Number(bar.dataset.val))}`);
+  });
+});
+
+// VER TODAS
+document.getElementById('ver-todas').addEventListener('click',()=>goPage('transacoes','Transações'));
+
+// MODAL NOVA TX
+const modalTx=document.getElementById('modal-tx');
+document.getElementById('btn-nova-tx').addEventListener('click',()=>modalTx.classList.add('open'));
+document.getElementById('modal-close').addEventListener('click',()=>modalTx.classList.remove('open'));
+document.getElementById('modal-cancel').addEventListener('click',()=>modalTx.classList.remove('open'));
+
+document.querySelectorAll('.radio-btn[data-tipo]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.radio-btn[data-tipo]').forEach(b=>b.classList.remove('sel'));
+    btn.classList.add('sel');tipoSel=btn.dataset.tipo;
+    const catSel=document.getElementById('tx-cat');
+    if(tipoSel==='receita'){catSel.value='Salário';}
+    else if(tipoSel==='transferencia'){catSel.value='Poupança';}
+    else{catSel.value='Alimentação';}
+  });
+});
+
+document.getElementById('modal-confirm').addEventListener('click',()=>{
+  const desc=document.getElementById('tx-desc').value.trim();
+  const valor=parseFloat(document.getElementById('tx-valor').value);
+  const cat=document.getElementById('tx-cat').value;
+  if(!desc){showToast('Informe uma descrição!');return;}
+  if(!valor||valor<=0){showToast('Informe um valor válido!');return;}
+  txs.unshift({id:nextId++,tipo:tipoSel,desc,cat,valor,data:'11 jun 2026',conta:'Conta corrente'});
+  if(tipoSel==='despesa'){balances.corrente=Math.max(0,balances.corrente-valor);}
+  else if(tipoSel==='receita'){balances.corrente+=valor;}
+  updateBalances();
+  renderDashTxs();
+  document.getElementById('tx-desc').value='';document.getElementById('tx-valor').value='';
+  modalTx.classList.remove('open');
+  showToast('Transação adicionada com sucesso!');
+});
+
+modalTx.addEventListener('click',e=>{if(e.target===modalTx)modalTx.classList.remove('open')});
+
+// MODAL DETALHE
+const modalDetail=document.getElementById('modal-detail');
+function openDetail(id){
+  selectedTx=txs.find(t=>t.id===id);
+  if(!selectedTx)return;
+  const isIncome=selectedTx.tipo==='receita';
+  document.getElementById('detail-body').innerHTML=`<div class="tx-detail">
+    <span>Descrição</span>${selectedTx.desc}
+    <span>Valor</span><strong style="color:${isIncome?'#0F6E56':'#993C1D'}">${isIncome?'+':'-'} ${fmt(selectedTx.valor)}</strong>
+    <span>Data</span>${selectedTx.data}
+    <span>Categoria</span>${selectedTx.cat}
+    <span>Conta</span>${selectedTx.conta}
+    <span>Tipo</span>${selectedTx.tipo.charAt(0).toUpperCase()+selectedTx.tipo.slice(1)}
+  </div>`;
+  modalDetail.classList.add('open');
+}
+document.getElementById('detail-close').addEventListener('click',()=>modalDetail.classList.remove('open'));
+document.getElementById('detail-cancel').addEventListener('click',()=>modalDetail.classList.remove('open'));
+document.getElementById('detail-delete').addEventListener('click',()=>{
+  if(!selectedTx)return;
+  txs=txs.filter(t=>t.id!==selectedTx.id);
+  renderDashTxs();renderFullTxs();renderExtrato();
+  modalDetail.classList.remove('open');
+  showToast('Transação excluída.');selectedTx=null;
+});
+modalDetail.addEventListener('click',e=>{if(e.target===modalDetail)modalDetail.classList.remove('open')});
+
+// SEARCH/FILTER
+document.getElementById('tx-search').addEventListener('input',renderFullTxs);
+document.getElementById('tx-filter').addEventListener('change',renderFullTxs);
+
+// NUMPAD TRANSFERÊNCIA
+document.querySelectorAll('.numkey').forEach(k=>{
+  k.addEventListener('click',()=>{
+    if(k.dataset.k==='del'){tfDigits=tfDigits.slice(0,-1);}
+    else if(tfDigits.length<8){tfDigits+=k.dataset.k;}
+    const cents=parseInt(tfDigits||'0');
+    document.getElementById('tf-amount').textContent=fmt(cents/100);
+  });
+});
+
+document.getElementById('btn-confirmar-tf').addEventListener('click',()=>{
+  const cents=parseInt(tfDigits||'0');
+  const valor=cents/100;
+  if(valor<=0){showToast('Digite um valor para transferir!');return;}
+  const de=document.getElementById('tf-de').value;
+  const para=document.getElementById('tf-para').value;
+  if(de===para){showToast('Origem e destino devem ser diferentes!');return;}
+  if(balances[de]<valor){showToast('Saldo insuficiente!');return;}
+  balances[de]-=valor;balances[para]+=valor;
+  txs.unshift({id:nextId++,tipo:'transferencia',desc:`Transferência ${de==='corrente'?'Corrente→Poupança':'Poupança→Corrente'}`,cat:'Poupança',valor,data:'11 jun 2026',conta:'Entre contas'});
+  tfDigits='';document.getElementById('tf-amount').textContent='R$ 0,00';
+  updateBalances();renderDashTxs();
+  showToast(`Transferência de ${fmt(valor)} realizada!`);
+});
+
+// PDF EXTRATO
+document.getElementById('btn-gerar-pdf').addEventListener('click',()=>{
+  const btn=document.getElementById('btn-gerar-pdf');
+  btn.innerHTML='<i class="ti ti-loader ti-spin"></i> Gerando...';btn.disabled=true;
+  setTimeout(()=>{
+    btn.innerHTML='<i class="ti ti-check"></i> PDF gerado!';btn.style.background='#0F6E56';btn.style.color='#fff';btn.style.borderColor='#0F6E56';
+    showToast('Extrato_Junho_2026.pdf gerado com sucesso!');
+    setTimeout(()=>{btn.innerHTML='<i class="ti ti-file-download"></i> Gerar PDF';btn.disabled=false;btn.style.background='';btn.style.color='';btn.style.borderColor='';},3000);
+  },1800);
+});
+
+// NOVA CONTA
+document.getElementById('btn-nova-conta').addEventListener('click',()=>showToast('Funcionalidade em desenvolvimento.'));
+
+// INIT
+renderDashTxs();updateBalances();
+</script>
+</body>
+</html>
